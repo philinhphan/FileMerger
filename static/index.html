@@ -17,7 +17,7 @@
         <h1 class="mb-4">Code File Merger</h1>
         <div class="mb-3">
             <input type="file" id="file-input" multiple class="form-control">
-            <small class="text-muted">Max file size: 5MB, Allowed types: .txt, .java, .xml, .kt, .py, .js, .jsx, .json, .html, .css, .unity, .cs</small>
+            <small class="text-muted">Max file size: 5MB, Allowed types: .txt, .java, .xml, .kt, .py, .js, .jsx, .json, .html, .css, .unity, .cs, .md</small>
         </div>
         <div class="mb-3">
             <input type="text" id="output-filename" placeholder="Output file name" class="form-control" value="merged_output.txt">
@@ -39,6 +39,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-jsx.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markdown.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markup.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
@@ -52,7 +53,7 @@
         const downloadBtn = document.getElementById('download-btn');
 
         const maxFileSize = 5 * 1024 * 1024; // 5MB
-        const allowedTypes = ['.txt', '.java', '.xml', '.kt', '.py', '.js', '.jsx', '.json', '.html', '.css', '.unity', '.cs'];
+        const allowedTypes = ['.txt', '.java', '.xml', '.kt', '.py', '.js', '.jsx', '.json', '.html', '.css', '.unity', '.cs', '.md'];
         let fileId = null;
         let selectedFiles = new Set();
 

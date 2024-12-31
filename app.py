@@ -1,6 +1,5 @@
 from flask import Flask, request, send_file, jsonify, session
 from werkzeug.utils import secure_filename
-import json
 import os
 import tempfile
 import mimetypes
@@ -8,12 +7,17 @@ import traceback
 import uuid
 import yaml
 from yaml.loader import SafeLoader
+import json  # Added import for the json module
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session handling
 
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
-ALLOWED_EXTENSIONS = {'.txt', '.java', '.xml', '.kt', '.py', '.js', '.html', '.css', '.unity', '.cs', '.jsx', '.json'}
+ALLOWED_EXTENSIONS = {
+    '.txt', '.java', '.xml', '.kt', '.py',
+    '.js', '.jsx', '.json', '.html', '.css',
+    '.unity', '.cs', '.md'
+}
 
 @app.route('/')
 def index():
@@ -47,10 +51,12 @@ def merge_files():
                 mime_type, _ = mimetypes.guess_type(filename)
                 app.logger.info(f"File: {filename}, MIME type: {mime_type}")  # Log MIME type
 
-                # Special handling for XML, Unity, and JSON files
-                if file_ext in ['.xml', '.unity', '.json']:
+                # Special handling for XML, Unity, JSON, and Markdown files
+                if file_ext in ['.xml', '.unity', '.json', '.md']:
                     if file_ext == '.json':
                         mime_type = 'application/json'
+                    elif file_ext == '.md':
+                        mime_type = 'text/markdown'
                     else:
                         mime_type = 'application/xml'
                 elif file_ext == '.cs':
@@ -83,6 +89,14 @@ def merge_files():
                         except json.JSONDecodeError:
                             # If JSON parsing fails, keep the original content
                             pass
+                    elif file_ext == '.md':
+                        # Optional: Process Markdown content
+                        content = content.decode('utf-8')
+                        # For simplicity, include Markdown as-is. Alternatively, convert to HTML.
+                        # Example conversion to HTML using markdown module (if desired):
+                        # import markdown
+                        # content = markdown.markdown(content)
+                        # For now, we'll include it as Markdown text.
                     else:
                         content = content.decode('utf-8')
                 except UnicodeDecodeError:
@@ -125,6 +139,7 @@ def download_file(file_id):
 def cleanup(response):
     # This function is intended to clean up temporary files after the response
     # However, using request.view_args may not cover all routes
+    # Instead, consider implementing a background cleanup process or use session lifecycle hooks
     file_id = None
     if request.endpoint == 'download_file' and 'file_id' in request.view_args:
         file_id = request.view_args.get('file_id')
