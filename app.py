@@ -15,7 +15,7 @@ app.secret_key = os.urandom(24)  # For session handling
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 ALLOWED_EXTENSIONS = {
     '.txt', '.java', '.xml', '.kt', '.py',
-    '.js', '.jsx', '.json', '.html', '.css',
+    '.js', '.jsx', '.ts', '.tsx', '.json', '.html', '.css',
     '.unity', '.cs', '.md'
 }
 
@@ -61,10 +61,12 @@ def merge_files():
                         mime_type = 'application/xml'
                 elif file_ext == '.cs':
                     mime_type = 'text/plain'
-                elif file_ext == '.jsx':
+                elif file_ext in ['.jsx', '.tsx']:
                     mime_type = 'application/javascript'
+                elif file_ext == '.ts':
+                    mime_type = 'application/typescript'
 
-                if not mime_type or (not mime_type.startswith('text') and mime_type not in ['application/xml', 'application/json', 'application/javascript']):
+                if not mime_type or (not mime_type.startswith('text') and mime_type not in ['application/xml', 'application/json', 'application/javascript', 'application/typescript']):
                     return jsonify({'error': f'Invalid file type: {filename} (MIME: {mime_type})'}), 400
 
                 try:

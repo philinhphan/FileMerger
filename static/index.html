@@ -17,7 +17,11 @@
         <h1 class="mb-4">Code File Merger</h1>
         <div class="mb-3">
             <input type="file" id="file-input" multiple class="form-control">
-            <small class="text-muted">Max file size: 5MB, Allowed types: .txt, .java, .xml, .kt, .py, .js, .jsx, .json, .html, .css, .unity, .cs, .md</small>
+            <small class="text-muted">Max file size: 5MB, Allowed types: .txt, .java, .xml, .kt, .py, .js, .jsx, .ts, .tsx, .json, .html, .css, .unity, .cs, .md</small>
+        </div>
+        <div class="mb-3">
+            <input type="file" id="folder-input" webkitdirectory class="form-control">
+            <small class="text-muted">Select a folder to add all supported files from it and its subfolders</small>
         </div>
         <div class="mb-3">
             <input type="text" id="output-filename" placeholder="Output file name" class="form-control" value="merged_output.txt">
@@ -43,8 +47,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-markup.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-typescript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-tsx.min.js"></script>
     <script>
         const fileInput = document.getElementById('file-input');
+        const folderInput = document.getElementById('folder-input');
         const fileList = document.getElementById('file-list');
         const preview = document.getElementById('preview');
         const progressBar = document.getElementById('progress-bar');
@@ -53,11 +60,12 @@
         const downloadBtn = document.getElementById('download-btn');
 
         const maxFileSize = 5 * 1024 * 1024; // 5MB
-        const allowedTypes = ['.txt', '.java', '.xml', '.kt', '.py', '.js', '.jsx', '.json', '.html', '.css', '.unity', '.cs', '.md'];
+        const allowedTypes = ['.txt', '.java', '.xml', '.kt', '.py', '.js', '.jsx', '.ts', '.tsx', '.json', '.html', '.css', '.unity', '.cs', '.md'];
         let fileId = null;
         let selectedFiles = new Set();
 
         fileInput.addEventListener('change', updateFileList);
+        folderInput.addEventListener('change', updateFolderFiles);
 
         function updateFileList() {
             for (const file of fileInput.files) {
@@ -66,28 +74,43 @@
             renderFileList();
         }
 
+        function updateFolderFiles() {
+            let addedCount = 0;
+            for (const file of folderInput.files) {
+                const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+                if (allowedTypes.includes(fileExt)) {
+                    selectedFiles.add(file);
+                    addedCount++;
+                }
+            }
+            renderFileList();
+            alert(`Added ${addedCount} files from the selected folder(s).`);
+        }
+
         function renderFileList() {
             fileList.innerHTML = '<h3>Selected Files:</h3>';
             let validFiles = true;
             selectedFiles.forEach(file => {
                 const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+                const displayPath = file.webkitRelativePath || file.name;
                 if (file.size > maxFileSize || !allowedTypes.includes(fileExt)) {
-                    fileList.innerHTML += `<p class="text-danger">${file.name} (Invalid: ${file.size > maxFileSize ? 'Too large' : 'Unsupported type'})</p>`;
+                    fileList.innerHTML += `<p class="text-danger">${displayPath} (Invalid: ${file.size > maxFileSize ? 'Too large' : 'Unsupported type'})</p>`;
                     validFiles = false;
                 } else {
                     fileList.innerHTML += `
                         <p>
-                            ${file.name}
-                            <button onclick="removeFile('${file.name}')" class="btn btn-sm btn-danger">Remove</button>
+                            ${displayPath}
+                            <button onclick="removeFile('${displayPath}')" class="btn btn-sm btn-danger">Remove</button>
                         </p>`;
                 }
             });
             return validFiles;
         }
 
-        function removeFile(fileName) {
+        function removeFile(displayPath) {
             selectedFiles.forEach(file => {
-                if (file.name === fileName) {
+                const filePath = file.webkitRelativePath || file.name;
+                if (filePath === displayPath) {
                     selectedFiles.delete(file);
                 }
             });
@@ -97,6 +120,7 @@
         function removeAllFiles() {
             selectedFiles.clear();
             fileInput.value = ''; // Clear the file input
+            folderInput.value = ''; // Clear the folder input
             renderFileList();
         }
 
